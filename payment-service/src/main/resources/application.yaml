@@ -1,0 +1,59 @@
+server:
+  port: ${SERVER_PORT:8081}
+  servlet:
+    context-path: /api-payment/api/v1
+  shutdown: graceful
+
+# Spring
+spring:
+  application:
+    name: ${APPLICATION_NAME:payment-service}
+    request-interceptor:
+      threshold: ${REQUEST_LOG_THRESHOLD:5000}
+      enabled: ${REQUEST_LOG_ENABLED:true}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER:localhost:9092}
+    consumer:
+      group-id: payment-service
+      client-id: payment-service
+
+payment:
+  topic: payment
+
+# Jaeger
+opentracing:
+  jaeger:
+    enabled: ${JAEGER_ENABLED:true}
+    service-name: ${spring.application.name}
+    log-spans: ${OPENTRACING_LOG_SPANS:false}
+    http-sender:
+      url: ${JAEGER_ENDPOINT:http://localhost:14268/api/traces}
+    probabilistic-sampler:
+      sampling-rate: ${JAEGER_SAMPLER:1}
+  spring:
+    cloud:
+      jdbc:
+        enabled: ${JAEGER_JDBC:false}
+    web:
+      skip-pattern: ${JAEGER_SKIP_PATTERN:/actuator.*}
+
+# Prometheus
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_ENDPOINTS:info,health,prometheus}
+    prometheus:
+      enabled: ${PROMETHEUS_ENABLED:true}
+    metrics:
+      export:
+        prometheus:
+          enabled: ${PROMETHEUS_ENABLED:true}
+          descriptions: ${PROMETHEUS_DESCRIPTION_ENABLED:true}
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+#logging:
+#  pattern:
+#    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

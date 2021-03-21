@@ -1,0 +1,66 @@
+version: '3.1'
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.18
+    container_name: jaeger
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778/udp"
+      - "16686:16686"
+      - "14268:14268"
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper-microservice
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-microservice
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+  order-service:
+    container_name: order-service
+    image: lucascoelhosilva/order-service
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    environment:
+      SERVER_PORT: 8080
+      REQUEST_LOG_ENABLED: "true"
+      JAEGER_ENDPOINT: "http://jaeger:14268/api/traces"
+      API_PAYMENT_URL: "http://payment-service:8081/api-payment/api/v1"
+      KAFKA_SERVER: kafka:9092
+    ports:
+      - "8080:8080"
+      - "8001:8001"
+    depends_on:
+      - kafka
+  payment-service:
+    container_name: payment-service
+    image: lucascoelhosilva/payment-service
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    environment:
+      SERVER_PORT: 8081
+      REQUEST_LOG_ENABLED: "true"
+      JAEGER_ENDPOINT: "http://jaeger:14268/api/traces"
+      KAFKA_SERVER: kafka:9092
+    ports:
+      - "8081:8081"
+      - "8002:8002"
+    depends_on:
+      - kafka
