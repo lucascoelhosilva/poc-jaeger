@@ -1,6 +1,5 @@
 package com.coelho.paymentservice.controllers;
 
-import com.coelho.paymentservice.exceptions.ForbiddenException;
 import com.coelho.paymentservice.models.Payment;
 import com.coelho.paymentservice.services.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +28,6 @@ public class PaymentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void post(@RequestHeader(name = "userId") String userId, @Validated @RequestBody Payment requestBody) {
-
-        if (userId != null) {
-
-            throw new ForbiddenException("Forbidden");
-        }
-
         service.create(requestBody);
     }
 

@@ -12,7 +12,8 @@ spring:
       threshold: ${REQUEST_LOG_THRESHOLD:5000}
       enabled: ${REQUEST_LOG_ENABLED:true}
   kafka:
-    bootstrap-servers: ${KAFKA_SERVER:localhost:9092}
+    producer:
+      bootstrap-servers: ${KAFKA_SERVER:localhost:9092}
 
 payment:
   topic: payment

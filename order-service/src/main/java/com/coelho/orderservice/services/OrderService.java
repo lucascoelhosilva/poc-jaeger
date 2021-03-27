@@ -23,7 +23,7 @@ public class OrderService {
     private final PaymentService paymentService;
     private final Tracer tracer;
 
-    public void create(Order order) {
+    public void create(String userId, Order order) {
         log.info("Creating {}", order);
         repository.save(order);
 
@@ -32,13 +32,13 @@ public class OrderService {
                                  .status(Status.PROCESSING)
                                  .build();
 
-        Span sprintSpan = tracer.buildSpan("payment")
-                                .withTag("orderId", order.getId().toString())
-                                .start();
+//        Span sprintSpan = tracer.buildSpan("create")
+//                                .withTag("orderId", order.getId().toString())
+//                                .start();
 
-        paymentService.sendPayment(payment);
+        paymentService.sendPayment(userId, payment);
 
-        sprintSpan.finish();
+//        sprintSpan.finish();
     }
 
     public void createAsync(Order order) {

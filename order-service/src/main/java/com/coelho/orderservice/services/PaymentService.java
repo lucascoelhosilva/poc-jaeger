@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.opentracing.contrib.kafka.TracingKafkaProducer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.UUID;
 
 @Slf4j
@@ -30,18 +31,20 @@ public class PaymentService {
     String paymentTopic;
 
     private final RestTemplate restTemplate;
-    private final TracingKafkaProducer<String, String> kafkaProducer;
+    private final KafkaProducer<String, String> kafkaProducer;
 
-    public PaymentService(RestTemplate restTemplate, TracingKafkaProducer<String, String> kafkaProducer) {
+    public PaymentService(RestTemplate restTemplate, KafkaProducer<String, String> kafkaProducer) {
         this.restTemplate = restTemplate;
         this.kafkaProducer = kafkaProducer;
     }
 
     @SneakyThrows
-    public void sendPayment(Payment payment) {
+    public void sendPayment(String userId, Payment payment) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.put("userId", List.of("test"));
+
+        if (userId != null)
+            headers.put("userId", Collections.singletonList(userId));
 
         HttpEntity<Payment> request = new HttpEntity<>(payment, headers);
 

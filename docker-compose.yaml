@@ -21,6 +21,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka-microservice
+    restart: on-failure
     ports:
       - "9092:9092"
     depends_on:
@@ -29,8 +30,8 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_ADVERTISED_HOST_NAME: kafka
   order-service:
     container_name: order-service
     image: lucascoelhosilva/order-service
