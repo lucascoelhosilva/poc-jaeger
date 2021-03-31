@@ -37,6 +37,9 @@ public class RequestInterceptor implements HandlerInterceptor {
         if (Objects.nonNull(tracer) && Objects.nonNull(tracer.activeSpan()) &&
                 Objects.nonNull(tracer.activeSpan().context())) {
             String traceId = tracer.activeSpan().context().toTraceId();
+
+            log.info("traceId {} ", traceId);
+
             MDC.put("traceId", traceId);
             MDC.put("spanId", tracer.activeSpan().context().toSpanId());
             response.addHeader("traceId", traceId);
